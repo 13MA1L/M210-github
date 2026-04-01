@@ -3,8 +3,8 @@ name: Deploy Auto-Verwaltung
 on:
   push:
     branches:
-      - main
       - master
+      - main
 
 jobs:
   deploy:
@@ -21,15 +21,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: us-east-1
-
-      - name: Backend ZIP erstellen und Lambda updaten
-        run: |
-          cd backend
-          npm ci
-          zip -r function.zip .
-          aws lambda update-function-code \
-            --function-name AutoAPI-ismail \
-            --zip-file fileb://function.zip
 
       - name: Frontend bauen
         run: |
