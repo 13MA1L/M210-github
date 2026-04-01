@@ -22,24 +22,10 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: us-east-1
 
-      - name: Terraform installieren
-        uses: hashicorp/setup-terraform@v3
-
-      - name: Backend ZIP für Terraform erstellen
+      - name: Backend ZIP erstellen und Lambda updaten
         run: |
           cd backend
           npm ci
-          zip -r ../terraform/backend_code.zip .
-
-      - name: Terraform apply
-        run: |
-          cd terraform
-          terraform init
-          terraform apply -auto-approve
-
-      - name: Lambda Code aktualisieren
-        run: |
-          cd backend
           zip -r function.zip .
           aws lambda update-function-code \
             --function-name AutoAPI-ismail \
@@ -48,7 +34,6 @@ jobs:
       - name: Frontend bauen
         run: |
           cd frontend
-          npm install
           npm ci
           npm run build
 
