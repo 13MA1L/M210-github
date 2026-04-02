@@ -1,10 +1,21 @@
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const { DynamoDBDocumentClient, PutCommand, ScanCommand } = require("@aws-sdk/lib-dynamodb");
+const {
+  DynamoDBDocumentClient,
+  PutCommand,
+  ScanCommand
+} = require("@aws-sdk/lib-dynamodb");
 
 const client = new DynamoDBClient({ region: "us-east-1" });
 const dynamo = DynamoDBDocumentClient.from(client);
 
 const TABLE_NAME = "AutoVerwaltungDB-ismail";
+
+const headers = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "*",
+  "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+  "Content-Type": "application/json"
+};
 
 exports.handler = async (event) => {
   try {
@@ -13,6 +24,7 @@ exports.handler = async (event) => {
     if (method === "OPTIONS") {
       return {
         statusCode: 200,
+        headers,
         body: JSON.stringify({ message: "OK" })
       };
     }
@@ -23,6 +35,7 @@ exports.handler = async (event) => {
       if (!body.kennzeichen) {
         return {
           statusCode: 400,
+          headers,
           body: JSON.stringify({ message: "Kennzeichen fehlt" })
         };
       }
@@ -32,14 +45,15 @@ exports.handler = async (event) => {
           TableName: TABLE_NAME,
           Item: {
             Kennzeichen: body.kennzeichen,
-            Marke: body.marke,
-            Modell: body.modell
+            Marke: body.marke || "",
+            Modell: body.modell || ""
           }
         })
       );
 
       return {
         statusCode: 200,
+        headers,
         body: JSON.stringify({ message: "Gespeichert" })
       };
     }
@@ -53,12 +67,14 @@ exports.handler = async (event) => {
 
       return {
         statusCode: 200,
+        headers,
         body: JSON.stringify(result.Items || [])
       };
     }
 
     return {
       statusCode: 405,
+      headers,
       body: JSON.stringify({ message: "Method not allowed" })
     };
   } catch (error) {
@@ -66,6 +82,7 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 500,
+      headers,
       body: JSON.stringify({
         message: "Interner Fehler",
         error: error.message
