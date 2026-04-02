@@ -1,15 +1,89 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="de">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AutoVerwaltung</title>
+  <title>DynamoDB Datensätze</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      color: #222;
+    }
+
+    button {
+      padding: 10px 16px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 16px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .error {
+      color: red;
+      font-weight: bold;
+    }
+  </style>
 </head>
 
 <body>
-  <div id="root"></div>
-  <script type="module" src="/src/main.tsx"></script>
+  <h1>DynamoDB Datensätze</h1>
+  <button onclick="ladeDaten()">Daten laden</button>
+  <div id="status"></div>
+  <div id="daten"></div>
+
+  <script>
+    const API_URL = "https://tisnmbxaoly2e2og7tblu5hqi40xhkyy.lambda-url.us-east-1.on.aws/";
+
+    async function ladeDaten() {
+      const status = document.getElementById("status");
+      const datenDiv = document.getElementById("daten");
+
+      status.innerHTML = "Lade Daten...";
+      datenDiv.innerHTML = "";
+
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) {
+          throw new Error("HTTP Fehler: " + response.status);
+        }
+
+        const daten = await response.json();
+
+        status.innerHTML = "";
+
+        if (!Array.isArray(daten) || daten.length === 0) {
+          datenDiv.innerHTML = "<p>Keine Datensätze gefunden.</p>";
+          return;
+        }
+
+        daten.forEach(eintrag => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `
+<p><strong>Name:</strong> ${eintrag.name ?? "-"}</p>
+<p><strong>Alter:</strong> ${eintrag.alter ?? "-"}</p>
+<p><strong>Geschlecht:</strong> ${eintrag.geschlecht ?? "-"}</p>
+          `;
+          datenDiv.appendChild(card);
+        });
+      } catch (fehler) {
+        status.innerHTML = `<p class="error">Fehler beim Laden: ${fehler.message}</p>`;
+      }
+    }
+  </script>
 </body>
 
 </html>
