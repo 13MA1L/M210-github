@@ -1,66 +1,62 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import "./App.css";
 
-type Car = {
-  Kennzeichen: string;
+type Auto = {
+  Kennzeichen?: string;
   Marke?: string;
   Modell?: string;
 };
 
 function App() {
-  const [cars, setCars] = useState<Car[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [daten, setDaten] = useState<Auto[]>([]);
+  const [fehler, setFehler] = useState("");
 
-  useEffect(() => {
-    fetch("https://tisnmbxaoly2e2og7tblu5hqi40xhkyy.lambda-url.us-east-1.on.aws/")
-      .then(async (res) => {
-        if (!res.ok) {
-          throw new Error(`HTTP Fehler: ${res.status}`);
-        }
-        return res.json();
-      })
-      .then((data) => {
-        setCars(data);
-      })
-      .catch((err) => {
-        setError(err.message);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []);
+  const datenLaden = async () => {
+    try {
+      setFehler("");
+
+      const response = await fetch(
+        "https://tisnmbxaoly2e2og7tblu5hqi40xhkyy.lambda-url.us-east-1.on.aws/"
+      );
+
+      if (!response.ok) {
+        throw new Error("Fehler beim Laden");
+      }
+
+      const result = await response.json();
+      setDaten(result);
+    } catch (error) {
+      setFehler("Fehler beim Laden: " + (error as Error).message);
+    }
+  };
 
   return (
-    <div style={{ padding: "30px", fontFamily: "Arial" }}>
-      <h1>Auto-Verwaltung</h1>
+    <div style={{ padding: "40px", fontFamily: "Arial" }}>
+      <h1>DynamoDB Datensätze</h1>
 
-      {loading && <p>Lade Daten...</p>}
-      {error && <p style={{ color: "red" }}>Fehler: {error}</p>}
+      <button onClick={datenLaden}>Daten laden</button>
 
-      {!loading && !error && cars.length === 0 && (
-        <p>Keine Daten gefunden.</p>
-      )}
+      {fehler && <p style={{ color: "red" }}>{fehler}</p>}
 
-      {!loading && !error && cars.length > 0 && (
-        <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "20px" }}>
-          <thead>
-            <tr>
-              <th style={{ borderBottom: "1px solid #ccc", textAlign: "left", padding: "8px" }}>Kennzeichen</th>
-              <th style={{ borderBottom: "1px solid #ccc", textAlign: "left", padding: "8px" }}>Marke</th>
-              <th style={{ borderBottom: "1px solid #ccc", textAlign: "left", padding: "8px" }}>Modell</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cars.map((car, index) => (
-              <tr key={index}>
-                <td style={{ borderBottom: "1px solid #eee", padding: "8px" }}>{car.Kennzeichen}</td>
-                <td style={{ borderBottom: "1px solid #eee", padding: "8px" }}>{car.Marke || "-"}</td>
-                <td style={{ borderBottom: "1px solid #eee", padding: "8px" }}>{car.Modell || "-"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      <div style={{ marginTop: "20px" }}>
+        {daten.map((item, index) => (
+          <div
+            key={index}
+            style={{
+              background: "#f5f5f5",
+              padding: "20px",
+              borderRadius: "12px",
+              marginBottom: "20px",
+              maxWidth: "400px",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+            }}
+          >
+            <p><strong>Kennzeichen:</strong> {item.Kennzeichen || "-"}</p>
+            <p><strong>Marke:</strong> {item.Marke || "-"}</p>
+            <p><strong>Modell:</strong> {item.Modell || "-"}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
