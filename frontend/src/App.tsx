@@ -10,9 +10,11 @@ type Auto = {
 function App() {
   const [daten, setDaten] = useState<Auto[]>([]);
   const [fehler, setFehler] = useState("");
+  const [laden, setLaden] = useState(false);
 
   const datenLaden = async () => {
     try {
+      setLaden(true);
       setFehler("");
 
       const response = await fetch(
@@ -20,43 +22,34 @@ function App() {
       );
 
       if (!response.ok) {
-        throw new Error("Fehler beim Laden");
+        throw new Error(`HTTP Fehler: ${response.status}`);
       }
 
       const result = await response.json();
       setDaten(result);
     } catch (error) {
       setFehler("Fehler beim Laden: " + (error as Error).message);
+    } finally {
+      setLaden(false);
     }
   };
 
   return (
-    <div style={{ padding: "40px", fontFamily: "Arial" }}>
-      <h1>DynamoDB Datensätze</h1>
+    <div className="container">
+      <h1>🚗 Auto-Verwaltung</h1>
 
       <button onClick={datenLaden}>Daten laden</button>
 
-      {fehler && <p style={{ color: "red" }}>{fehler}</p>}
+      {laden && <p className="loading">Lade Daten...</p>}
+      {fehler && <p className="error">{fehler}</p>}
 
-      <div style={{ marginTop: "20px" }}>
-        {daten.map((item, index) => (
-          <div
-            key={index}
-            style={{
-              background: "#f5f5f5",
-              padding: "20px",
-              borderRadius: "12px",
-              marginBottom: "20px",
-              maxWidth: "400px",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
-            }}
-          >
-            <p><strong>Kennzeichen:</strong> {item.Kennzeichen || "-"}</p>
-            <p><strong>Marke:</strong> {item.Marke || "-"}</p>
-            <p><strong>Modell:</strong> {item.Modell || "-"}</p>
-          </div>
-        ))}
-      </div>
+      {daten.map((item, index) => (
+        <div key={index} className="card">
+          <p><span className="label">Kennzeichen:</span> {item.Kennzeichen || "-"}</p>
+          <p><span className="label">Marke:</span> {item.Marke || "-"}</p>
+          <p><span className="label">Modell:</span> {item.Modell || "-"}</p>
+        </div>
+      ))}
     </div>
   );
 }
