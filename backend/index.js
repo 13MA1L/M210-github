@@ -31,7 +31,9 @@ exports.handler = async (event) => {
         new PutCommand({
           TableName: TABLE_NAME,
           Item: {
-            Kennzeichen: body.kennzeichen
+            Kennzeichen: body.kennzeichen,
+            Marke: body.marke,
+            Modell: body.modell
           }
         })
       );
