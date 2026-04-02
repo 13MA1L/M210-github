@@ -10,13 +10,6 @@ const dynamo = DynamoDBDocumentClient.from(client);
 
 const TABLE_NAME = "AutoVerwaltungDB-ismail";
 
-const headers = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "*",
-  "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-  "Content-Type": "application/json"
-};
-
 exports.handler = async (event) => {
   try {
     const method = event.requestContext?.http?.method || event.httpMethod;
@@ -24,7 +17,6 @@ exports.handler = async (event) => {
     if (method === "OPTIONS") {
       return {
         statusCode: 200,
-        headers,
         body: JSON.stringify({ message: "OK" })
       };
     }
@@ -35,7 +27,6 @@ exports.handler = async (event) => {
       if (!body.kennzeichen) {
         return {
           statusCode: 400,
-          headers,
           body: JSON.stringify({ message: "Kennzeichen fehlt" })
         };
       }
@@ -53,7 +44,6 @@ exports.handler = async (event) => {
 
       return {
         statusCode: 200,
-        headers,
         body: JSON.stringify({ message: "Gespeichert" })
       };
     }
@@ -67,14 +57,12 @@ exports.handler = async (event) => {
 
       return {
         statusCode: 200,
-        headers,
         body: JSON.stringify(result.Items || [])
       };
     }
 
     return {
       statusCode: 405,
-      headers,
       body: JSON.stringify({ message: "Method not allowed" })
     };
   } catch (error) {
@@ -82,7 +70,6 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 500,
-      headers,
       body: JSON.stringify({
         message: "Interner Fehler",
         error: error.message
